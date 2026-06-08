@@ -16,6 +16,7 @@ import Login from "./pages/Login"
 import SignUp from "./pages/SignUp"
 import Home from "./pages/Home"
 import NotFound from "./pages/NotFound"
+import SQLEditor from "./pages/SQLEditor"
 
 const queryClient = new QueryClient()
 
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
+                <Route path="/sql-editor" element={<SQLEditor />} />
                 <Route 
                   path="/home" 
                   element={

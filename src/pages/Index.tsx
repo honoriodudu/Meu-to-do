@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, ListTodo, Database } from "lucide-react"
+import { ArrowRight, ListTodo, Database, Code } from "lucide-react"
 import { MadeWithDyad } from "@/components/made-with-dyad"
 
 const Index = () => {
@@ -27,6 +27,12 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
+            <Button variant="outline" size="lg" className="px-8" asChild>
+              <a href="/sql-editor">
+                SQL Editor
+                <Code className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
           </div>
         </div>
       </section>
@@ -39,7 +45,7 @@ const Index = () => {
             <p className="text-muted-foreground">Descubra as principais características que nos destacam</p>
           </div>
           
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             <Card className="text-center">
               <CardHeader>
                 <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -107,6 +113,12 @@ const Index = () => {
                   <a href="/signup">
                     Criar Conta Gratuita
                     <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+                <Button variant="outline" size="lg" asChild>
+                  <a href="/sql-editor">
+                    SQL Editor
+                    <Code className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
               </div>
