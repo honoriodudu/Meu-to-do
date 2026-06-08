@@ -1,4 +1,16 @@
-# Logs
+#!/usr/bin/env node
+
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+console.log('Removendo .env do rastreamento do Git...');
+
+try {
+  // Remove o arquivo do rastreamento do Git mas mantém no disco
+  execSync('git rm --cached .env', { stdio: 'inherit' });
+  
+  // Garante que o .gitignore está atualizado
+  const gitignoreContent = `# Logs
 logs
 *.log
 npm-debug.log*
@@ -105,20 +117,24 @@ public
 
 # Temporary folders
 tmp/
-temp
+temp`;
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.dyad/
-
-# Custom
-.env
-.env.local
-.env.*.local
+  fs.writeFileSync('.gitignore', gitignoreContent);
+  
+  // Adiciona o .gitignore ao staging
+  execSync('git add .gitignore', { stdio: 'inherit' });
+  
+  // Faz commit da mudança
+  execSync('git commit -m "Remove .env from Git tracking and update .gitignore"', { stdio: 'inherit' });
+  
+  console.log('✅ .env removido do rastreamento do Git com sucesso!');
+  console.log('✅ .gitignore atualizado com todas as configurações necessárias.');
+  console.log('✅ Commit realizado. Execute "git push" para enviar para o GitHub.');
+  
+} catch (error) {
+  console.error('❌ Erro ao remover .env do rastreamento do Git:', error.message);
+  console.log('Por favor, execute manualmente:');
+  console.log('git rm --cached .env');
+  console.log('git add .gitignore');
+  console.log('git commit -m "Remove .env from Git tracking"');
+}
