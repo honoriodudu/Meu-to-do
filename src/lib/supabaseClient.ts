@@ -1,16 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
-
-// Tenta usar variáveis de ambiente, se disponíveis
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-let supabaseInstance: any = null
-
-if (supabaseUrl && supabaseAnonKey) {
-  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey)
-}
-
-export const supabase = supabaseInstance
+// Versão mock para desenvolvimento
+// Para usar Supabase real, instale o pacote e configure variáveis de ambiente
+export const supabase = null
 
 export type User = {
   id: string
