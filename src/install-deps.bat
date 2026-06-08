@@ -1,5 +1,9 @@
 @echo off
-echo Instalando dependências...
-npm install supabase-js
+echo Instalando dependências do projeto...
+echo.
+
+npm install
+
+echo.
 echo Instalação concluída!
 pause

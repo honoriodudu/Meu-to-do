@@ -5,27 +5,42 @@
 - npm ou yarn
 
 ## Instalação das Dependências
-Execute o seguinte comando no terminal:
 
+### Método 1: Usar scripts fornecidos
+Execute o script correspondente ao seu sistema:
+
+**Windows:**
+```bash
+src/install-deps.bat
+```
+
+**Linux/Mac:**
+```bash
+chmod +x src/install-deps.sh
+./src/install-deps.sh
+```
+
+### Método 2: Instalação manual
+Se os scripts não funcionarem, instale manualmente:
 ```bash
 npm install
 ```
 
-Se você estiver em um Windows com restrições de execução de script, use:
-
+### Método 3: Instalar apenas o Supabase
 ```bash
-npm install supabase-js
+npm install @supabase/supabase-js
 ```
 
-Para usar o Supabase real, adicione as seguintes variáveis de ambiente ao seu `.env`:
+## Configuração do Supabase
 
-```env
-VITE_SUPABASE_URL=https://seu-projeto.supabase.co
-VITE_SUPABASE_ANON_KEY=sua-chave-anonima
-```
+### 1. Execute o SQL no Supabase
+Copie e cole o conteúdo de `database-setup.sql` no SQL Editor do seu projeto Supabase.
+
+### 2. Execute exemplos (opcional)
+Copie e cole o conteúdo de `database-examples.sql` para testar as consultas.
 
 ## Demo com Autenticação Local
-Se não conseguir instalar o Supabase, use a autenticação local:
+Se não conseguir configurar o Supabase, use a autenticação local:
 
 - Login: test@example.com
 - Senha: password
@@ -33,3 +48,10 @@ Se não conseguir instalar o Supabase, use a autenticação local:
 ## Execução
 ```bash
 npm run dev
+```
+
+## Estrutura do Projeto
+- `src/integrations/supabase/` - Configuração do Supabase
+- `src/lib/database.ts` - Funções de banco de dados
+- `src/contexts/AuthContext.tsx` - Contexto de autenticação
+- `src/pages/SQLEditor.tsx` - Editor SQL
