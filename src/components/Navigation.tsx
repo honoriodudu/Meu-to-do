@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,9 @@ const Navigation = () => {
   const navItems = [
     { path: "/", label: "Início" },
     { path: "/about", label: "Sobre" },
+    { path: "/services", label: "Serviços" },
+    { path: "/pricing", label: "Preços" },
+    { path: "/contact", label: "Contato" },
   ];
 
   return (
@@ -37,10 +41,12 @@ const Navigation = () => {
                 {item.label}
               </Link>
             ))}
+            <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
