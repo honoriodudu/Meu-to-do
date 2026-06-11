@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { MadeWithDyad } from '@/components/made-with-dyad'
-import { ListTodo, Plus, Trash2, CheckCircle2, CircleDashed } from 'lucide-react'
+import { ListTodo, Plus, Trash2, CircleDashed, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { cn } from '@/lib/utils'
@@ -21,6 +22,7 @@ type Task = {
 }
 
 const Home = () => {
+  const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -115,6 +117,16 @@ const Home = () => {
     toast.success('Tarefa removida.')
   }
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut()
+      navigate('/login', { replace: true })
+      toast.success('Você foi deslogado com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao sair: ' + (error.message || 'Tente novamente'))
+    }
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -137,7 +149,8 @@ const Home = () => {
       <header className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-foreground">Meu To Do</h1>
-          <Button variant="outline" onClick={() => {}}>
+          <Button variant="outline" onClick={handleLogout} className="gap-2">
+            <LogOut className="h-4 w-4" />
             Sair
           </Button>
         </div>
