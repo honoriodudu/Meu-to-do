@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { MadeWithDyad } from '@/components/made-with-dyad'
 import { ListTodo, Plus, Trash2, CheckCircle2, CircleDashed } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
+import { cn } from '@/lib/utils'
 
 type Task = {
   id: string
@@ -93,7 +94,7 @@ const Home = () => {
     setTasks((currentTasks) =>
       currentTasks.map((item) =>
         item.id === task.id
-          ? { ...item, is_completed: !task.is_completed }
+          ? { ...item, is_completed: !item.is_completed }
           : item
       )
     )
