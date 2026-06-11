@@ -1,12 +1,16 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, ListTodo, Database } from "lucide-react"
-import { MadeWithDyad } from "@/components/made-with-dyad"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, ListTodo, Database } from "lucide-react";
+import { MadeWithDyad } from "@/components/made-with-dyad";
 
+/**
+ * Página inicial pública da aplicação.
+ *
+ * Apresenta o valor principal do app e direciona para login, cadastro ou sobre.
+ */
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
       <section className="py-20 bg-gradient-to-br from-muted/20 to-background">
         <div className="container mx-auto px-4 text-center">
           <div className="flex justify-center mb-6">
@@ -14,11 +18,9 @@ const Index = () => {
               <ListTodo className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h1 className="text-5xl font-bold mb-6">
-            Meu To Do
-          </h1>
+          <h1 className="text-5xl font-bold mb-6">Meu To Do</h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Organize suas tarefas diárias com nossa aplicação simples e eficiente.
+            Organize suas tarefas diárias com data de início, prazo final e status.
           </p>
           <div className="flex gap-4 justify-center">
             <Button size="lg" className="px-8" asChild>
@@ -37,14 +39,13 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Por que usar Meu To Do?</h2>
             <p className="text-muted-foreground">Descubra as principais características que nos destacam</p>
           </div>
-          
+
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             <Card className="text-center">
               <CardHeader>
@@ -78,7 +79,7 @@ const Index = () => {
                 <CardTitle className="text-lg">Organizado</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Categorize e ordene suas tarefas</p>
+                <p className="text-muted-foreground">Defina data de início, prazo final e status</p>
               </CardContent>
             </Card>
 
@@ -97,7 +98,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <Card className="text-center">
@@ -127,7 +127,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-border mt-12">
         <div className="container mx-auto px-4 py-6">
           <MadeWithDyad />

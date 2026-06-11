@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { useTodoTasks } from "../hooks/useTodoTasks";
+import { TodoDateFields } from "./TodoDateFields";
 import {
   defaultTodoFormValues,
   todoFormSchema,
@@ -34,14 +35,25 @@ import {
 } from "../todo.types";
 import { toDateTimeLocalValue } from "../todo.utils";
 
+/** Props do diálogo de criação e edição de tarefas. */
 interface TodoFormDialogProps {
+  /** Controla a abertura do diálogo. */
   open: boolean;
+  /** Callback chamado quando a abertura do diálogo muda. */
   onOpenChange: (open: boolean) => void;
+  /** Tarefa sendo editada, quando aplicável. */
   editingTask?: TodoTask;
+  /** ID do usuário autenticado. */
   userId?: string;
+  /** Callback executado após criar ou editar com sucesso. */
   onSuccess?: () => void;
 }
 
+/**
+ * Diálogo usado para criar ou editar uma tarefa.
+ *
+ * Inclui título, descrição, status, data de início e prazo final.
+ */
 export function TodoFormDialog({
   open,
   onOpenChange,
@@ -69,6 +81,7 @@ export function TodoFormDialog({
             title: editingTask.title,
             description: editingTask.description ?? "",
             completed: editingTask.completed,
+            start_datetime: toDateTimeLocalValue(editingTask.start_date),
             due_datetime: toDateTimeLocalValue(editingTask.due_date),
           }
         : defaultTodoFormValues,
@@ -82,6 +95,7 @@ export function TodoFormDialog({
       title: values.title.trim(),
       description: values.description?.trim() ?? "",
       completed: values.completed,
+      start_datetime: values.start_datetime || undefined,
       due_datetime: values.due_datetime || undefined,
     };
 
@@ -105,7 +119,7 @@ export function TodoFormDialog({
             {isEditing ? "Editar tarefa" : "Nova tarefa"}
           </DialogTitle>
           <DialogDescription>
-            {isEditing ? "Atualize os dados da tarefa." : "Cadastre uma nova tarefa com data e horário."}
+            {isEditing ? "Atualize os dados da tarefa." : "Cadastre uma nova tarefa com datas."}
           </DialogDescription>
         </DialogHeader>
 
@@ -143,19 +157,7 @@ export function TodoFormDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="due_datetime"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data e horário</FormLabel>
-                  <FormControl>
-                    <Input type="datetime-local" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <TodoDateFields control={form.control} />
 
             <FormField
               control={form.control}

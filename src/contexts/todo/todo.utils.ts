@@ -18,7 +18,23 @@ export function toDateTimeLocalValue(value?: string | null): string {
 }
 
 /**
- * Converte data e horário do formulário para ISO antes de salvar no Supabase.
+ * Converte data de início do formulário para ISO antes de salvar no Supabase.
+ *
+ * @param value - Valor no formato datetime-local.
+ * @returns ISO string ou null quando vazio.
+ */
+export function toDatabaseStartDate(value?: string): string | null {
+  if (!value) return null;
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return null;
+
+  return date.toISOString();
+}
+
+/**
+ * Converte prazo final do formulário para ISO antes de salvar no Supabase.
  *
  * @param value - Valor no formato datetime-local.
  * @returns ISO string ou null quando vazio.
@@ -34,13 +50,13 @@ export function toDatabaseDueDate(value?: string): string | null {
 }
 
 /**
- * Formata data e horário da tarefa para exibição em pt-BR.
+ * Formata uma data e horário de tarefa para exibição em pt-BR.
  *
  * @param value - Valor ISO ou string vazia.
  * @returns Texto formatado para o usuário.
  */
-export function formatTodoDueDate(value?: string | null): string {
-  if (!value) return "Sem prazo";
+export function formatTodoDate(value?: string | null): string {
+  if (!value) return "Sem data";
 
   const date = new Date(value);
 
@@ -53,4 +69,14 @@ export function formatTodoDueDate(value?: string | null): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+
+/**
+ * Mantém compatibilidade com chamadas antigas que usavam o nome específico de prazo.
+ *
+ * @param value - Valor ISO ou string vazia.
+ * @returns Texto formatado para o usuário.
+ */
+export function formatTodoDueDate(value?: string | null): string {
+  return formatTodoDate(value);
 }

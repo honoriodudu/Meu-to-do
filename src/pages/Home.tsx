@@ -12,6 +12,11 @@ import { TodoList } from "@/contexts/todo/components/TodoList";
 import { useTodoTasks } from "@/contexts/todo/hooks/useTodoTasks";
 import type { TodoTask } from "@/contexts/todo/todo.types";
 
+/**
+ * Página principal do usuário autenticado.
+ *
+ * Composição da lista de tarefas, resumo e diálogo de criação ou edição.
+ */
 const Home = () => {
   const { user, loading: authLoading } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -81,7 +86,7 @@ const Home = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Meu To Do</h1>
             <p className="text-sm text-muted-foreground">
-              Organize suas tarefas com data e horário.
+              Organize suas tarefas com data de início, prazo final e status.
             </p>
           </div>
           <Button onClick={openCreateDialog} className="gap-2">
@@ -108,7 +113,7 @@ const Home = () => {
                 {tasks.length} tarefas no total
               </Badge>
               <p className="text-sm text-muted-foreground">
-                Use o botão editar em cada tarefa para alterar título, descrição, status, data e horário.
+                Use data de início e prazo final para planejar cada tarefa com mais clareza.
               </p>
             </CardContent>
           </Card>

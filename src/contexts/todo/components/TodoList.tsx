@@ -4,14 +4,25 @@ import { CircleDashed } from "lucide-react";
 import { TodoItem } from "./TodoItem";
 import type { TodoTask } from "../todo.types";
 
+/** Props da lista de tarefas. */
 interface TodoListProps {
+  /** Tarefas a serem exibidas. */
   tasks: TodoTask[];
+  /** Indica se as tarefas ainda estão carregando. */
   isLoading: boolean;
+  /** Callback chamado ao alternar conclusão. */
   onToggle: (id: string, completed: boolean) => Promise<void>;
+  /** Callback chamado ao abrir edição. */
   onEdit: (task: TodoTask) => void;
+  /** Callback chamado ao remover tarefa. */
   onDelete: (id: string) => Promise<void>;
 }
 
+/**
+ * Renderiza a lista, estado vazio e skeletons de carregamento.
+ *
+ * Delega cada linha para TodoItem para manter a composição simples.
+ */
 export function TodoList({ tasks, isLoading, onToggle, onEdit, onDelete }: TodoListProps) {
   if (isLoading) {
     return (
@@ -29,7 +40,7 @@ export function TodoList({ tasks, isLoading, onToggle, onEdit, onDelete }: TodoL
         <CircleDashed className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
         <h3 className="font-medium">Nenhuma tarefa cadastrada</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Crie sua primeira tarefa com título, descrição, data e horário.
+          Crie sua primeira tarefa com título, descrição, data de início e prazo final.
         </p>
       </div>
     );

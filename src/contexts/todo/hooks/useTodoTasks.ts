@@ -10,16 +10,29 @@ import {
 } from "../services/todo.service";
 import type { TodoChangeInput, TodoInput, TodoTask } from "../todo.types";
 
+/** Resultado retornado pelo hook de tarefas. */
 interface UseTodoTasksResult {
+  /** Lista de tarefas do usuário. */
   tasks: TodoTask[];
+  /** Indica se as tarefas estão carregando. */
   isLoading: boolean;
+  /** Indica se alguma mutação está em andamento. */
   isSaving: boolean;
+  /** Cria uma tarefa. */
   addTodo: (input: TodoInput) => Promise<TodoTask>;
+  /** Edita uma tarefa existente. */
   changeTodo: (params: TodoChangeInput) => Promise<TodoTask>;
+  /** Remove uma tarefa. */
   removeTodo: (id: string) => Promise<void>;
+  /** Alterna o status de conclusão. */
   toggleTodoCompletion: (id: string, completed: boolean) => Promise<TodoTask>;
 }
 
+/**
+ * Gerencia consultas e mutações das tarefas do usuário.
+ *
+ * Usa TanStack Query para manter a lista sincronizada após alterações.
+ */
 export function useTodoTasks(userId: string | undefined): UseTodoTasksResult {
   const queryClient = useQueryClient();
   const queryKey = todoQueryKeys.userTasks(userId ?? "anonymous");
@@ -75,7 +88,7 @@ export function useTodoTasks(userId: string | undefined): UseTodoTasksResult {
   const toggleMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
       if (!userId) throw new Error("Usuário não autenticado.");
-      return toggleTodoCompletion(id, completed);
+      return toggleTodoCompletion(userId, id, completed);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
