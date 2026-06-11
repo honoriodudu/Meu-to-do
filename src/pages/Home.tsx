@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MadeWithDyad } from '@/components/made-with-dyad'
 import { ListTodo, Plus, Trash2, CircleDashed, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
@@ -21,6 +22,13 @@ type Task = {
   created_at: string
 }
 
+/**
+ * Página principal da aplicação.
+ *
+ * - Cria, lista, atualiza e remove tarefas.
+ * - Permite mudar o status da tarefa entre "Pendente" e "Realizada".
+ * - Inclui botão de logout que encerra a sessão via Supabase.
+ */
 const Home = () => {
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
@@ -34,6 +42,7 @@ const Home = () => {
     [tasks]
   )
 
+  /** Carrega as tarefas do usuário autenticado */
   const loadTasks = async () => {
     if (!user?.id) return
 
@@ -47,6 +56,7 @@ const Home = () => {
 
     if (error) {
       toast.error('Não foi possível carregar suas tarefas.')
+      setLoading(false)
       return
     }
 
@@ -58,6 +68,7 @@ const Home = () => {
     loadTasks()
   }, [user?.id])
 
+  /** Cria nova tarefa */
   const handleCreateTask = async (event: React.FormEvent) => {
     event.preventDefault()
 
@@ -82,6 +93,7 @@ const Home = () => {
     await loadTasks()
   }
 
+  /** Alterna o status concluído da tarefa */
   const handleToggleTask = async (task: Task) => {
     const { error } = await supabase
       .from('todos')
@@ -93,30 +105,45 @@ const Home = () => {
       return
     }
 
-    setTasks((currentTasks) =>
-      currentTasks.map((item) =>
-        item.id === task.id
-          ? { ...item, is_completed: !item.is_completed }
-          : item
+    setTasks((current) =>
+      current.map((t) =>
+        t.id === task.id ? { ...t, is_completed: !t.is_completed } : t
       )
     )
   }
 
-  const handleDeleteTask = async (taskId: string) => {
+  /** Atualiza o status via seletor (Pendente / Realizada) */
+  const handleStatusChange = async (task: Task, status: 'pendente' | 'realizada') => {
+    const completed = status === 'realizada'
     const { error } = await supabase
       .from('todos')
-      .delete()
-      .eq('id', taskId)
+      .update({ completed })
+      .eq('id', task.id)
+
+    if (error) {
+      toast.error('Erro ao atualizar o status da tarefa.')
+      return
+    }
+
+    setTasks((current) =>
+      current.map((t) => (t.id === task.id ? { ...t, is_completed: completed } : t))
+    )
+  }
+
+  /** Remove tarefa */
+  const handleDeleteTask = async (taskId: string) => {
+    const { error } = await supabase.from('todos').delete().eq('id', taskId)
 
     if (error) {
       toast.error('Não foi possível excluir a tarefa.')
       return
     }
 
-    setTasks((currentTasks) => currentTasks.filter((task) => task.id !== taskId))
+    setTasks((current) => current.filter((t) => t.id !== taskId))
     toast.success('Tarefa removida.')
   }
 
+  /** Faz logout e redireciona para a página de login */
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut()
@@ -146,6 +173,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header com botão de logout */}
       <header className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-foreground">Meu To Do</h1>
@@ -158,15 +186,14 @@ const Home = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
+          {/* Formulário de criação de tarefa */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Plus className="h-5 w-5" />
                 Nova tarefa
               </CardTitle>
-              <CardDescription>
-                Cadastre uma nova tarefa para aparecer na sua lista.
-              </CardDescription>
+              <CardDescription>Cadastre uma nova tarefa para aparecer na sua lista.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleCreateTask} className="space-y-4">
@@ -175,7 +202,7 @@ const Home = () => {
                   <Input
                     id="title"
                     value={title}
-                    onChange={(event) => setTitle(event.target.value)}
+                    onChange={(e) => setTitle(e.target.value)}
                     placeholder="Ex: Comprar café"
                     required
                   />
@@ -186,7 +213,7 @@ const Home = () => {
                   <Input
                     id="description"
                     value={description}
-                    onChange={(event) => setDescription(event.target.value)}
+                    onChange={(e) => setDescription(e.target.value)}
                     placeholder="Detalhes opcionais"
                   />
                 </div>
@@ -198,6 +225,7 @@ const Home = () => {
             </CardContent>
           </Card>
 
+          {/* Lista de tarefas */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
@@ -220,9 +248,7 @@ const Home = () => {
               {tasks.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-8 text-center">
                   <CircleDashed className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-                  <p className="text-muted-foreground">
-                    Nenhuma tarefa cadastrada ainda.
-                  </p>
+                  <p className="text-muted-foreground">Nenhuma tarefa cadastrada ainda.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -231,12 +257,14 @@ const Home = () => {
                       key={task.id}
                       className="flex items-start gap-3 rounded-lg border p-4"
                     >
+                      {/* Checkbox para marcar como concluída */}
                       <Checkbox
                         checked={task.is_completed}
                         onCheckedChange={() => handleToggleTask(task)}
                         className="mt-1"
                       />
 
+                      {/* Conteúdo da tarefa */}
                       <div className="flex-1 min-w-0">
                         <p
                           className={cn(
@@ -253,6 +281,21 @@ const Home = () => {
                         )}
                       </div>
 
+                      {/* Seletor de status */}
+                      <Select
+                        value={task.is_completed ? 'realizada' : 'pendente'}
+                        onValueChange={(value) => handleStatusChange(task, value as 'pendente' | 'realizada')}
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pendente">Pendente</SelectItem>
+                          <SelectItem value="realizada">Realizada</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {/* Botão de exclusão */}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -269,6 +312,7 @@ const Home = () => {
         </div>
       </main>
 
+      {/* Footer */}
       <footer className="border-t border-border mt-12">
         <div className="container mx-auto px-4 py-6">
           <MadeWithDyad />
