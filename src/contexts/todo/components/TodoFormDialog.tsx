@@ -159,24 +159,26 @@ export function TodoFormDialog({
 
             <TodoDateFields control={form.control} />
 
-            <FormField
-              control={form.control}
-              name="completed"
-              render={({ field }) => (
-                <FormItem className="flex items-center gap-3 rounded-md border p-3">
-                  <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="font-medium">Marcar como concluída</FormLabel>
-                    <p className="text-sm text-muted-foreground">
-                      Use esta opção para alterar o status da tarefa.
-                    </p>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isEditing && (
+              <FormField
+                control={form.control}
+                name="completed"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-3 rounded-md border p-3">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-medium">Marcar como concluída</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Use esta opção para alterar o status da tarefa.
+                      </p>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
