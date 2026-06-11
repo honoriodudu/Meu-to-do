@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { TodoInput, TodoTask } from "../todo.types";
+import type { TodoChangeInput, TodoInput, TodoTask } from "../todo.types";
 import { toDatabaseDueDate, toDatabaseStartDate } from "../todo.utils";
 
 export const todoQueryKeys = {
@@ -90,17 +90,39 @@ export async function deleteTodo(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-/** Alterna o status de conclusão de uma tarefa. */
-export async function toggleTodoCompletion(id: string, completed: boolean): Promise<TodoTask> {
+/** Alterna o status de conclusão de uma tarefa pertencente ao usuário atual. */
+export async function toggleTodoCompletion(
+  userId: string,
+  id: string,
+  completed: boolean,
+): Promise<TodoTask> {
+  // Primeiro verifica se a tarefa existe e pertence ao usuário
+  const { data: existingTask, error: fetchError } = await supabase
+    .from("todos")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (fetchError) {
+    throw new Error(fetchError.message);
+  }
+
+  if (!existingTask) {
+    throw new Error("Tarefa não encontrada.");
+  }
+
+  // Agora atualiza o status
   const { data, error } = await supabase
     .from("todos")
     .update({ completed })
     .eq("id", id)
+    .eq("user_id", userId)
     .select()
-    .maybeSingle();
+    .single();
 
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Tarefa não encontrada.");
+  if (!data) throw new Error("Não foi possível atualizar a tarefa.");
 
   return data;
 }
