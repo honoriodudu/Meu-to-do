@@ -1,151 +1,166 @@
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { SQLToolbar } from '@/components/SQLToolbar'
-import { SQLTemplates } from '@/components/SQLTemplates'
-import { SQLHelp } from '@/components/SQLHelp'
-import { SQLResults } from '@/components/SQLResults'
-import { SQLSavedQueries } from '@/components/SQLSavedQueries'
-import { supabase } from '@/integrations/supabase/client'
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SQLToolbar } from "@/components/SQLToolbar";
+import { SQLTemplates } from "@/components/SQLTemplates";
+import { SQLHelp } from "@/components/SQLHelp";
+import { SQLResults } from "@/components/SQLResults";
+import { SQLSavedQueries } from "@/components/SQLSavedQueries";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { validateSQL } from "@/utils/sqlValidator";
 
 const SQLEditor = () => {
-  const [sqlQuery, setSqlQuery] = useState('')
-  const [results, setResults] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [savedQueries, setSavedQueries] = useState<any[]>([])
-  const [queryName, setQueryName] = useState('')
-  const [showSaved, setShowSaved] = useState(false)
-  const [savedQueryId, setSavedQueryId] = useState('')
-  const [user, setUser] = useState<any>(null)
+  const { user, loading: authLoading } = useAuth();
+  const [sqlQuery, setSqlQuery] = useState("");
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [savedQueries, setSavedQueries] = useState<any[]>([]);
+  const [queryName, setQueryName] = useState("");
+  const [showSaved, setShowSaved] = useState(false);
+  const [savedQueryId, setSavedQueryId] = useState("");
 
+  // Load saved queries only for the authenticated user
   useEffect(() => {
-    const currentUser = supabase.auth.getUser()
-    currentUser.then(({ data }) => {
-      setUser(data.user)
-    })
-
-    loadSavedQueries()
-  }, [])
+    if (!user) return;
+    loadSavedQueries();
+  }, [user]);
 
   const loadSavedQueries = async () => {
     try {
       const { data, error } = await supabase
-        .from('saved_queries')
-        .select('*')
-        .order('created_at', { ascending: false })
-      
-      if (error) throw error
-      setSavedQueries(data || [])
+        .from("saved_queries")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSavedQueries(data || []);
     } catch (err) {
-      console.error('Error loading saved queries:', err)
+      console.error("Error loading saved queries:", err);
     }
-  }
+  };
 
   const executeQuery = async () => {
-    if (!sqlQuery.trim()) {
-      showError('Por favor, digite uma consulta SQL')
-      return
-    }
+    if (!validateSQL(sqlQuery)) return;
 
-    setLoading(true)
-    setError(null)
-    setResults([])
+    setLoading(true);
+    setError(null);
+    setResults([]);
 
     try {
-      const { data, error } = await supabase.rpc('exec_sql', { 
-        sql: sqlQuery 
-      })
+      const { data, error } = await supabase.rpc("exec_sql", {
+        sql: sqlQuery,
+      });
 
-      if (error) throw error
-      
+      if (error) throw error;
+
       if (data && data.results) {
-        setResults(data.results)
-        showSuccess(`Consulta executada com sucesso! ${data.results.length} registros retornados.`)
+        setResults(data.results);
+        toast.success(
+          `Consulta executada com sucesso! ${data.results.length} registros retornados.`
+        );
       } else {
-        showSuccess('Consulta executada com sucesso!')
+        toast.success("Consulta executada com sucesso!");
       }
     } catch (err: any) {
-      setError(err.message || 'Erro ao executar consulta')
-      showError(`Erro: ${err.message}`)
+      setError(err.message || "Erro ao executar consulta");
+      toast.error(`Erro: ${err.message}`);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const clearResults = () => {
-    setResults([])
-    setSqlQuery('')
-    setError(null)
-  }
+    setResults([]);
+    setSqlQuery("");
+    setError(null);
+  };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(sqlQuery)
-    showSuccess('SQL copiado para o clipboard!')
-  }
+    navigator.clipboard.writeText(sqlQuery);
+    toast.success("SQL copiado para o clipboard!");
+  };
 
   const saveQuery = async () => {
     if (!queryName.trim()) {
-      showError('Por favor, digite um nome para a consulta')
-      return
+      toast.error("Por favor, digite um nome para a consulta");
+      return;
     }
+    if (!validateSQL(sqlQuery)) return;
 
     try {
       if (savedQueryId) {
         const { error } = await supabase
-          .from('saved_queries')
-          .update({ 
+          .from("saved_queries")
+          .update({
             sql_query: sqlQuery,
             query_name: queryName,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
-          .eq('id', savedQueryId)
-        
-        if (error) throw error
-        showSuccess('Consulta atualizada com sucesso!')
+          .eq("id", savedQueryId);
+
+        if (error) throw error;
+        toast.success("Consulta atualizada com sucesso!");
       } else {
-        const { error } = await supabase
-          .from('saved_queries')
-          .insert([{
+        const { error } = await supabase.from("saved_queries").insert([
+          {
             query_name: queryName,
             sql_query: sqlQuery,
-            user_id: user?.id
-          }])
-        
-        if (error) throw error
-        showSuccess('Consulta salva com sucesso!')
+            user_id: user?.id,
+          },
+        ]);
+
+        if (error) throw error;
+        toast.success("Consulta salva com sucesso!");
       }
-      
-      setQueryName('')
-      setSavedQueryId('')
-      await loadSavedQueries()
+
+      setQueryName("");
+      setSavedQueryId("");
+      await loadSavedQueries();
     } catch (err: any) {
-      showError(`Erro ao salvar consulta: ${err.message}`)
+      toast.error(`Erro ao salvar consulta: ${err.message}`);
     }
-  }
+  };
 
   const loadSavedQuery = (query: any) => {
-    setSqlQuery(query.sql_query)
-    setSavedQueryId(query.id)
-    setShowSaved(false)
-  }
+    setSqlQuery(query.sql_query);
+    setSavedQueryId(query.id);
+    setShowSaved(false);
+  };
 
   const deleteQuery = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('saved_queries')
-        .delete()
-        .eq('id', id)
-      
-      if (error) throw error
-      showSuccess('Consulta excluída com sucesso!')
-      await loadSavedQueries()
+      const { error } = await supabase.from("saved_queries").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Consulta excluída com sucesso!");
+      await loadSavedQueries();
     } catch (err: any) {
-      showError(`Erro ao excluir consulta: ${err.message}`)
+      toast.error(`Erro ao excluir consulta: ${err.message}`);
     }
-  }
+  };
 
   const toggleSavedVisibility = () => {
-    setShowSaved(!showSaved)
+    setShowSaved(!showSaved);
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-destructive">
+          Você precisa estar autenticado para usar o editor SQL.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -155,7 +170,9 @@ const SQLEditor = () => {
           <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
             SQL Editor
           </h1>
-          <p className="text-muted-foreground">Execute consultas SQL diretamente no seu banco de dados</p>
+          <p className="text-muted-foreground">
+            Execute consultas SQL diretamente no seu banco de dados
+          </p>
         </div>
       </header>
 
@@ -200,20 +217,22 @@ const SQLEditor = () => {
             <SQLResults
               results={results}
               onExport={() => {
-                const csv = convertToCSV(results)
-                const blob = new Blob([csv], { type: 'text/csv' })
-                const url = window.URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `sql-results-${new Date().toISOString().split('T')[0]}.csv`
-                a.click()
-                window.URL.revokeObjectURL(url)
-                showSuccess('Resultados exportados com sucesso!')
+                const csv = convertToCSV(results);
+                const blob = new Blob([csv], { type: "text/csv" });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `sql-results-${new Date()
+                  .toISOString()
+                  .split("T")[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                toast.success("Resultados exportados com sucesso!");
               }}
             />
           </div>
 
-          {/* Templates and Info */}
+          {/* Templates and Help */}
           <div className="space-y-6">
             <SQLTemplates onTemplateSelect={(template) => setSqlQuery(template)} />
             <SQLHelp />
@@ -221,28 +240,30 @@ const SQLEditor = () => {
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-// Helper function para exportação
+// Helper function for CSV export (unchanged)
 function convertToCSV(data: any[]) {
-  if (data.length === 0) return ''
-  
-  const headers = Object.keys(data[0])
+  if (data.length === 0) return "";
+
+  const headers = Object.keys(data[0]);
   const csvRows = [
-    headers.join(','),
-    ...data.map(row => 
-      headers.map(header => {
-        const value = row[header]
-        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-          return `"${value.replace(/"/g, '""')}"`
-        }
-        return value
-      }).join(',')
-    )
-  ]
-  
-  return csvRows.join('\n')
+    headers.join(","),
+    ...data.map((row) =>
+      headers
+        .map((header) => {
+          const value = row[header];
+          if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
+        })
+        .join(",")
+    ),
+  ];
+
+  return csvRows.join("\n");
 }
 
-export default SQLEditor
+export default SQLEditor;

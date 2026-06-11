@@ -1,25 +1,33 @@
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { FileText, Eye, EyeOff, Copy, Trash2 } from "lucide-react"
-import { showSuccess, showError } from "@/utils/toast"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileText, Eye, EyeOff, Copy, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { validateSQL } from "@/utils/sqlValidator";
 
 interface SQLSavedQueriesProps {
-  savedQueries: any[]
-  onLoadQuery: (query: any) => void
-  onDeleteQuery: (id: string) => void
-  onToggleVisibility: () => void
-  isVisible: boolean
+  savedQueries: any[];
+  onLoadQuery: (query: any) => void;
+  onDeleteQuery: (id: string) => void;
+  onToggleVisibility: () => void;
+  isVisible: boolean;
 }
 
-export function SQLSavedQueries({ 
-  savedQueries, 
-  onLoadQuery, 
-  onDeleteQuery, 
-  onToggleVisibility, 
-  isVisible 
+export function SQLSavedQueries({
+  savedQueries,
+  onLoadQuery,
+  onDeleteQuery,
+  onToggleVisibility,
+  isVisible,
 }: SQLSavedQueriesProps) {
-  if (savedQueries.length === 0) return null
+  if (savedQueries.length === 0) return null;
+
+  const handleLoad = (query: any) => {
+    if (!validateSQL(query.sql_query)) {
+      toast.error("A consulta salva contém comandos não permitidos.");
+      return;
+    }
+    onLoadQuery(query);
+  };
 
   return (
     <Card className="mb-8">
@@ -33,9 +41,7 @@ export function SQLSavedQueries({
             {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </Button>
         </CardTitle>
-        <CardDescription>
-          Gerencie suas consultas SQL salvas
-        </CardDescription>
+        <CardDescription>Gerencie suas consultas SQL salvas</CardDescription>
       </CardHeader>
       {isVisible && (
         <CardContent>
@@ -48,7 +54,7 @@ export function SQLSavedQueries({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onLoadQuery(query)}
+                      onClick={() => handleLoad(query)}
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
@@ -73,5 +79,5 @@ export function SQLSavedQueries({
         </CardContent>
       )}
     </Card>
-  )
+  );
 }
