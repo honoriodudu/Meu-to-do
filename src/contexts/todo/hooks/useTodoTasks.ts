@@ -109,6 +109,7 @@ export function useTodoTasks(userId: string | undefined): UseTodoTasksResult {
     addTodo: createMutation.mutateAsync,
     changeTodo: updateMutation.mutateAsync,
     removeTodo: deleteMutation.mutateAsync,
-    toggleTodoCompletion: toggleMutation.mutateAsync,
+    toggleTodoCompletion: (id: string, completed: boolean) =>
+      toggleMutation.mutateAsync({ id, completed }),
   };
 }
