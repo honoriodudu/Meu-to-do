@@ -51,10 +51,9 @@ function DatePill({ label, value }: DatePillProps) {
 /**
  * Exibe uma tarefa com ações de conclusão, edição e exclusão.
  *
- * Mostra data de início e prazo final quando disponíveis.
+ * A edição abre o formulário diretamente; a exclusão ainda pede confirmação antes de remover.
  */
 export function TodoItem({ task, onToggle, onEdit, onDelete }: TodoItemProps) {
-  const [showEditConfirm, setShowEditConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -63,16 +62,7 @@ export function TodoItem({ task, onToggle, onEdit, onDelete }: TodoItemProps) {
   };
 
   const handleEditClick = () => {
-    setShowEditConfirm(true);
-  };
-
-  const confirmEdit = () => {
-    setShowEditConfirm(false);
     onEdit(task);
-  };
-
-  const cancelEdit = () => {
-    setShowEditConfirm(false);
   };
 
   const handleDeleteClick = () => {
@@ -82,6 +72,7 @@ export function TodoItem({ task, onToggle, onEdit, onDelete }: TodoItemProps) {
   const confirmDelete = async () => {
     setShowDeleteConfirm(false);
     setIsDeleting(true);
+
     try {
       await onDelete(task.id);
     } finally {
@@ -161,34 +152,6 @@ export function TodoItem({ task, onToggle, onEdit, onDelete }: TodoItemProps) {
         </Button>
       </div>
 
-      {/* Edit Confirmation Dialog */}
-      {showEditConfirm && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-background p-6 shadow-lg">
-            <h3 className="text-lg font-semibold">Confirmar Edição</h3>
-            <p className="mt-2 text-muted-foreground">
-              Tem certeza que deseja editar a tarefa "{task.title}"?
-            </p>
-            <div className="mt-6 flex gap-3">
-              <Button
-                variant="outline"
-                onClick={cancelEdit}
-                className="flex-1"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={confirmEdit}
-                className="flex-1"
-              >
-                Confirmar Edição
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-background p-6 shadow-lg">

@@ -1,10 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -52,7 +62,7 @@ interface TodoFormDialogProps {
 /**
  * Diálogo usado para criar ou editar uma tarefa.
  *
- * Inclui título, descrição, status, data de início e prazo final.
+ * Cria tarefas diretamente; edições pedem confirmação apenas antes de salvar.
  */
 export function TodoFormDialog({
   open,
@@ -61,6 +71,7 @@ export function TodoFormDialog({
   userId,
   onSuccess,
 }: TodoFormDialogProps) {
+  const [confirmEditOpen, setConfirmEditOpen] = useState(false);
   const form = useForm<TodoFormValues>({
     resolver: zodResolver(todoFormSchema),
     defaultValues: defaultTodoFormValues,
@@ -72,6 +83,7 @@ export function TodoFormDialog({
   useEffect(() => {
     if (!open) {
       form.reset(defaultTodoFormValues);
+      setConfirmEditOpen(false);
       return;
     }
 
@@ -88,7 +100,7 @@ export function TodoFormDialog({
     );
   }, [editingTask, form, open]);
 
-  const onSubmit = async (values: TodoFormValues) => {
+  const saveTodo = async (values: TodoFormValues) => {
     if (!userId) return;
 
     const input: TodoInput = {
@@ -108,6 +120,24 @@ export function TodoFormDialog({
     onOpenChange(false);
     onSuccess?.();
     form.reset(defaultTodoFormValues);
+  };
+
+  const onSubmit = async (values: TodoFormValues) => {
+    if (!userId) return;
+
+    if (editingTask) {
+      setConfirmEditOpen(true);
+      return;
+    }
+
+    await saveTodo(values);
+  };
+
+  const confirmEdit = async () => {
+    const values = form.getValues();
+
+    await saveTodo(values);
+    setConfirmEditOpen(false);
   };
 
   return (
@@ -191,6 +221,23 @@ export function TodoFormDialog({
           </form>
         </Form>
       </DialogContent>
+
+      <AlertDialog open={confirmEditOpen} onOpenChange={setConfirmEditOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar edição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja salvar as alterações nesta tarefa?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSaving}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction disabled={isSaving} onClick={() => void confirmEdit()}>
+              {isSaving ? "Salvando..." : "Confirmar e salvar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
