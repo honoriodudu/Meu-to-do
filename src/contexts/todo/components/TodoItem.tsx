@@ -53,8 +53,43 @@ function DatePill({ label, value }: DatePillProps) {
  * Mostra data de início e prazo final quando disponíveis.
  */
 export function TodoItem({ task, onToggle, onEdit, onDelete }: TodoItemProps) {
+  const [showEditConfirm, setShowEditConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleToggle = (completed: boolean) => {
     void onToggle(task.id, completed);
+  };
+
+  const handleEditClick = () => {
+    setShowEditConfirm(true);
+  };
+
+  const confirmEdit = () => {
+    setShowEditConfirm(false);
+    onEdit(task);
+  };
+
+  const cancelEdit = () => {
+    setShowEditConfirm(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    setShowDeleteConfirm(false);
+    setIsDeleting(true);
+    try {
+      await onDelete(task.id);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   const hasStartDate = Boolean(task.start_date);
@@ -110,19 +145,77 @@ export function TodoItem({ task, onToggle, onEdit, onDelete }: TodoItemProps) {
           </SelectContent>
         </Select>
 
-        <Button variant="ghost" size="icon" onClick={() => onEdit(task)} aria-label="Editar tarefa">
+        <Button variant="ghost" size="icon" onClick={handleEditClick} aria-label="Editar tarefa">
           <Pencil className="h-4 w-4" />
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => void onDelete(task.id)}
+          onClick={handleDeleteClick}
+          disabled={isDeleting}
           aria-label="Excluir tarefa"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
+
+      {/* Edit Confirmation Dialog */}
+      {showEditConfirm && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-background p-6 shadow-lg">
+            <h3 className="text-lg font-semibold">Confirmar Edição</h3>
+            <p className="mt-2 text-muted-foreground">
+              Tem certeza que deseja editar a tarefa "{task.title}"?
+            </p>
+            <div className="mt-6 flex gap-3">
+              <Button
+                variant="outline"
+                onClick={cancelEdit}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmEdit}
+                className="flex-1"
+              >
+                Confirmar Edição
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-background p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-destructive">Confirmar Exclusão</h3>
+            <p className="mt-2 text-muted-foreground">
+              Tem certeza que deseja excluir a tarefa "{task.title}"? Esta ação não pode ser desfeita.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <Button
+                variant="outline"
+                onClick={cancelDelete}
+                className="flex-1"
+                disabled={isDeleting}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                className="flex-1"
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Excluindo..." : "Excluir Tarefa"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
