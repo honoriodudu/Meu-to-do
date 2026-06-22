@@ -2,11 +2,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ListTodo, Database } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 /**
  * Página inicial pública da aplicação.
  *
  * Apresenta o valor principal do app e direciona para login, cadastro ou sobre.
+ * Inclui demonstração do novo estilo visual com GlassCard.
  */
 const Index = () => {
   return (
@@ -95,6 +97,28 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* New visual style showcase */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-2xl">Novo Estilo Visual</CardTitle>
+              <CardDescription>
+                Experimente nosso novo visual com efeito vidro
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <GlassCard>
+                <p className="text-muted-foreground">
+                  Este é um exemplo de cartão com efeito vidro usando backdrop-filter e blur.
+                </p>
+              </GlassCard>
+              <GlassCard className="p-6">
+                <p className="text-sm text-muted-foreground">
+                  O efeito vidro cria uma sensação moderna e leve, ideal para interfaces contemporâneas.
+                </p>
+              </GlassCard>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
