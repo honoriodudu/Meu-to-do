@@ -83,13 +83,25 @@ export async function updateTodo(id: string, input: TodoInput): Promise<TodoTask
   return data;
 }
 
-/** Remove uma tarefa do banco. */
+/** Remove uma tarefa pelo ID padrão. */
 export async function deleteTodo(id: string): Promise<void> {
-  // Garantia de que o id não seja undefined ou vazio
   if (!id) {
     throw new Error("ID da tarefa não informado.");
   }
   const { error } = await supabase.from("todos").delete().eq("id", id);
+
+  if (error) throw new Error(error.message);
+}
+
+/** Remove uma tarefa usando um identificador alternativo (dyad_reference). */
+export async function deleteTodoByReference(reference: string): Promise<void> {
+  if (!reference) {
+    throw new Error("Referência da tarefa não informada."); 
+  }
+  const { error } = await supabase
+    .from("todos")
+    .delete()
+    .eq("dyad_reference", reference);
 
   if (error) throw new Error(error.message);
 }

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { deleteTodo, addTodo } from "../services/todo.service";
+import { deleteTodo, deleteTodoByReference, addTodo } from "../services/todo.service";
 import type { TodoTask, TodoInput } from "../todo.types";
 
 export function useSoftDeleteTodo(userId: string | undefined) {
@@ -8,12 +8,20 @@ export function useSoftDeleteTodo(userId: string | undefined) {
   const queryKey = userId ? ["todos", userId] : ["todos", "anonymous"];
 
   const deleteMutation = useMutation({
-    // 1. A mutação agora recebe um objeto com o ID e a Tarefa completa
-    mutationFn: async ({ id }: { id: string; task: TodoTask }) => {
+    // Accept either an id or a dyad_reference inside the task object
+    mutationFn: async ({ id, task }: { id?: string; task: TodoTask }) => {
       if (!userId) throw new Error("Usuário não autenticado.");
-      return deleteTodo(id);
+
+      if (id) {
+        // Normal deletion by primary key
+        return deleteTodo(id);
+      } else if ((task as any).dyad_reference) {
+        // Alternative deletion by custom reference column
+        return deleteTodoByReference((task as any).dyad_reference);
+      } else {
+        throw new Error("ID da tarefa e referência não informados.");
+      }
     },
-    // 2. Acessamos a tarefa através do parâmetro `variables`
     onSuccess: (_, variables) => {
       // Invalida a lista para recarregar
       queryClient.invalidateQueries({ queryKey });
@@ -24,9 +32,9 @@ export function useSoftDeleteTodo(userId: string | undefined) {
         action: {
           label: "Desfazer",
           onClick: () => {
-            // Recupera a tarefa diretamente das variáveis enviadas para a mutação
+            // Recupera os dados da tarefa a partir das variáveis enviadas
             const { title, description, completed, start_date, due_date } = variables.task;
-            
+
             const input: TodoInput = {
               title,
               description: description ?? "",
@@ -55,8 +63,8 @@ export function useSoftDeleteTodo(userId: string | undefined) {
   });
 
   const softDelete = async (task: TodoTask) => {
-    // 3. Enviamos o objeto completo, sem necessidade de @ts-ignore
-    await deleteMutation.mutateAsync({ id: task.id, task });
+    // Passa o objeto completo; o mutationFn decide como excluir
+    await deleteMutation.mutateAsync({ task });
   };
 
   return { softDelete, isDeleting: deleteMutation.isPending };
