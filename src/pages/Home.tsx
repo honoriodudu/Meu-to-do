@@ -6,16 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { ListTodo, Plus } from "lucide-react";
+import { ListTodo, Plus, CheckSquare, Clock, CalendarDays } from "lucide-react";
 import { TodoFormDialog } from "@/contexts/todo/components/TodoFormDialog";
 import { TodoList } from "@/contexts/todo/components/TodoList";
 import { useTodoTasks } from "@/contexts/todo/hooks/useTodoTasks";
+import { useSoftDeleteTodo } from "@/contexts/todo/hooks/useSoftDeleteTodo";
 import type { TodoTask } from "@/contexts/todo/todo.types";
 
 /**
- * Página principal do usuário autenticado.
- *
- * Composição da lista de tarefas, resumo e diálogo de criação ou edição.
+ * Página principal do usuário autenticado com suporte a soft‑delete.
  */
 const Home = () => {
   const { user, loading: authLoading } = useAuth();
@@ -27,9 +26,10 @@ const Home = () => {
     isLoading,
     addTodo,
     changeTodo,
-    removeTodo,
     toggleTodoCompletion,
   } = useTodoTasks(user?.id);
+
+  const { softDelete, isDeleting } = useSoftDeleteTodo(user?.id);
 
   const completedCount = tasks.filter((task) => task.completed).length;
 
@@ -81,6 +81,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
           <div>
@@ -96,8 +97,10 @@ const Home = () => {
         </div>
       </header>
 
+      {/* Main */}
       <main className="container mx-auto px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
+          {/* Resumo */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -118,6 +121,7 @@ const Home = () => {
             </CardContent>
           </Card>
 
+          {/* Lista de tarefas */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
@@ -134,13 +138,14 @@ const Home = () => {
                 isLoading={isLoading}
                 onToggle={toggleTodoCompletion}
                 onEdit={openEditDialog}
-                onDelete={removeTodo}
+                onDelete={softDelete} // <-- soft‑delete aqui
               />
             </CardContent>
           </Card>
         </div>
       </main>
 
+      {/* Dialog de criação/edição */}
       <TodoFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -149,6 +154,7 @@ const Home = () => {
         onSuccess={() => setEditingTask(undefined)}
       />
 
+      {/* Footer */}
       <footer className="border-t border-border mt-12">
         <div className="container mx-auto px-4 py-6">
           <MadeWithDyad />
