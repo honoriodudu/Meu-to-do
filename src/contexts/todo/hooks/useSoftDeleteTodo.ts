@@ -53,9 +53,17 @@ export function useSoftDeleteTodo(userId: string | undefined) {
     },
   });
 
-  const softDelete = async (task: TodoTask) => {
-    // Pass the task's id as the id field so the mutationFn can use the normal delete path
-    await deleteMutation.mutateAsync({ id: task.id, task });
+  const softDelete = (task: TodoTask) => {
+    // 2. Barreira de proteção: se não tem ID, não tenta mutar (evita a tela vermelha de erro)
+    if (!task.id) {
+      toast.error("Tarefa corrompida", {
+        description: "Esta tarefa não possui um ID válido no sistema e não pode ser excluída."
+      });
+      return;
+    }
+
+    // 3. Usa o .mutate() (seguro) em vez de .mutateAsync() (que causa o clientIframe error)
+    deleteMutation.mutate({ id: task.id, task });
   };
 
   return { softDelete, isDeleting: deleteMutation.isPending };
