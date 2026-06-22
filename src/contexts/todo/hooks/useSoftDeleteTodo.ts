@@ -54,8 +54,8 @@ export function useSoftDeleteTodo(userId: string | undefined) {
   });
 
   const softDelete = async (task: TodoTask) => {
-    // Use mutateAsync to properly handle the promise
-    await deleteMutation.mutateAsync({ task });
+    // Pass the task's id as the id field so the mutationFn can use the normal delete path
+    await deleteMutation.mutateAsync({ id: task.id, task });
   };
 
   return { softDelete, isDeleting: deleteMutation.isPending };
