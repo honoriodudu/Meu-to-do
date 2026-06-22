@@ -1,18 +1,20 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ListTodo, Database } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { GlassCard } from "@/components/ui/GlassCard";
+import GlassCard from "@/components/ui/GlassCard";
 
 /**
- * Página inicial pública da aplicação.
+ * Public landing page.
  *
- * Apresenta o valor principal do app e direciona para login, cadastro ou sobre.
- * Inclui demonstração do novo estilo visual com GlassCard.
+ * Showcases the new glassmorphism visual style via GlassCard.
  */
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      {/* Hero */}
       <section className="py-20 bg-gradient-to-br from-muted/20 to-background">
         <div className="container mx-auto px-4 text-center">
           <div className="flex justify-center mb-6">
@@ -41,80 +43,56 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Features */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Por que usar Meu To Do?</h2>
-            <p className="text-muted-foreground">Descubra as principais características que nos destacam</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Descubra as principais características que nos destacam
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="text-center">
-              <CardHeader>
-                <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ListTodo className="h-6 w-6 text-blue-600" />
-                </div>
-                <CardTitle className="text-lg">Simples</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Interface intuitiva e fácil de usar</p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ListTodo className="h-6 w-6 text-green-600" />
-                </div>
-                <CardTitle className="text-lg">Rápido</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Adicione tarefas em segundos</p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ListTodo className="h-6 w-6 text-purple-600" />
-                </div>
-                <CardTitle className="text-lg">Organizado</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Defina data de início, prazo final e status</p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ListTodo className="h-6 w-6 text-orange-600" />
-                </div>
-                <CardTitle className="text-lg">Seguro</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Autenticação com Supabase</p>
-              </CardContent>
-            </Card>
+            {[
+              { color: "blue", label: "Simples", text: "Interface intuitiva e fácil de usar" },
+              { color: "green", label: "Rápido", text: "Adicione tarefas em segundos" },
+              { color: "purple", label: "Organizado", text: "Defina data de início, prazo final e status" },
+              { color: "orange", label: "Seguro", text: "Autenticação com Supabase" },
+            ].map((item, i) => (
+              <Card key={i} className="text-center">
+                <CardHeader>
+                  <div
+                    className={`h-12 w-12 bg-${item.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}
+                  >
+                    <ListTodo className={`h-6 w-6 text-${item.color}-600`} />
+                  </div>
+                  <CardTitle className="text-lg">{item.label}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">{item.text}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
-          {/* New visual style showcase */}
+          {/* New visual showcase */}
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="text-2xl">Novo Estilo Visual</CardTitle>
               <CardDescription>
-                Experimente nosso novo visual com efeito vidro
+                Experimente nosso efeito vidro (glassmorphism) com o componente GlassCard.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <GlassCard>
                 <p className="text-muted-foreground">
-                  Este é um exemplo de cartão com efeito vidro usando backdrop-filter e blur.
+                  Este cartão usa backdrop-filter e blur para criar um visual moderno e leve.
                 </p>
               </GlassCard>
               <GlassCard className="p-6">
                 <p className="text-sm text-muted-foreground">
-                  O efeito vidro cria uma sensação moderna e leve, ideal para interfaces contemporâneas.
+                  O efeito vidro traz profundidade e elegância, perfeito para interfaces contemporâneas.
                 </p>
               </GlassCard>
             </CardContent>
@@ -122,6 +100,7 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Call to action */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <Card className="text-center">
@@ -151,6 +130,7 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Footer */}
       <footer className="border-t border-border mt-12">
         <div className="container mx-auto px-4 py-6">
           <MadeWithDyad />
