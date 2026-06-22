@@ -33,7 +33,7 @@ export function useSoftDeleteTodo(userId: string | undefined) {
         action: {
           label: "Desfazer",
           onClick: () => {
-            if (taskToRestore) {
+            if (taskToRestore && taskToRestore.id) {
               const { title, description, completed, start_date, due_date } = taskToRestore;
               const input: TodoInput = {
                 title,
@@ -51,6 +51,8 @@ export function useSoftDeleteTodo(userId: string | undefined) {
                 .catch((e) => {
                   toast.error(`Falha ao restaurar: ${e.message}`);
                 });
+            } else {
+              toast.error("Não foi possível restaurar a tarefa.");
             }
           },
         },
@@ -68,6 +70,12 @@ export function useSoftDeleteTodo(userId: string | undefined) {
    * para possibilitar o desfazer.
    */
   const softDelete = async (task: TodoTask) => {
+    // Garante que a tarefa tenha um ID válido antes de prosseguir
+    if (!task.id) {
+      toast.error("ID da tarefa não informado.");
+      return;
+    }
+
     // Passa a tarefa completa como “context” para a mutação
     await deleteMutation.mutateAsync(task.id, {
       // @ts-ignore – o TanStack Query aceita `context` opcional
