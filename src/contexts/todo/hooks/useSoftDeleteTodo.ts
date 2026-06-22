@@ -8,6 +8,7 @@ import type { TodoTask, TodoInput } from "../todo.types";
  *
  * - Exibe um toast de confirmação com botão “Desfazer”.
  * - Se o usuário clicar em desfazer, a tarefa é recriada com os mesmos dados.
+ * - Garante que o `id` passado ao serviço não seja `undefined`.
  */
 export function useSoftDeleteTodo(userId: string | undefined) {
   const queryClient = useQueryClient();
@@ -15,12 +16,16 @@ export function useSoftDeleteTodo(userId: string | undefined) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      if (!userId) throw new Error("Usuário não autenticado.");
+      if (!id) throw new Error("ID da tarefa não informado.");
       return deleteTodo(id);
     },
     onSuccess: (_, deletedId, context) => {
       // Invalida a lista para recarregar
       queryClient.invalidateQueries({ queryKey });
+
+      // O objeto `context` foi passado como segundo argumento em `mutateAsync`
+      // e contém a tarefa que foi excluída.
+      const taskToRestore = context?.task as TodoTask | undefined;
 
       // Exibe toast com opção de desfazer
       toast.success("Tarefa excluída.", {
@@ -28,9 +33,8 @@ export function useSoftDeleteTodo(userId: string | undefined) {
         action: {
           label: "Desfazer",
           onClick: () => {
-            // Recria a tarefa usando os dados armazenados no contexto
-            if (context?.task) {
-              const { title, description, completed, start_date, due_date } = context.task;
+            if (taskToRestore) {
+              const { title, description, completed, start_date, due_date } = taskToRestore;
               const input: TodoInput = {
                 title,
                 description: description ?? "",
@@ -38,8 +42,8 @@ export function useSoftDeleteTodo(userId: string | undefined) {
                 start_datetime: start_date ?? undefined,
                 due_datetime: due_date ?? undefined,
               };
-              // Usa a mutação de criação para restaurar a tarefa
-              addTodo(userId, input)
+              // Recria a tarefa usando a mutação de criação
+              addTodo(userId!, input)
                 .then(() => {
                   toast.success("Tarefa restaurada.");
                   queryClient.invalidateQueries({ queryKey });
@@ -50,7 +54,7 @@ export function useSoftDeleteTodo(userId: string | undefined) {
             }
           },
         },
-        // Mantém o toast por tempo suficiente para o usuário decidir
+        // Mantém o toast aberto o suficiente para o usuário decidir
         duration: 8000,
       });
     },

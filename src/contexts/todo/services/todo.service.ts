@@ -85,6 +85,10 @@ export async function updateTodo(id: string, input: TodoInput): Promise<TodoTask
 
 /** Remove uma tarefa do banco. */
 export async function deleteTodo(id: string): Promise<void> {
+  // Garantia de que o id não seja undefined ou vazio
+  if (!id) {
+    throw new Error("ID da tarefa não informado.");
+  }
   const { error } = await supabase.from("todos").delete().eq("id", id);
 
   if (error) throw new Error(error.message);
