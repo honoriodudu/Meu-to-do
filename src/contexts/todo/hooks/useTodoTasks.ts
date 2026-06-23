@@ -1,115 +1,72 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  addTodo,
-  deleteTodo,
-  fetchUserTodos,
-  toggleTodoCompletion,
-  todoQueryKeys,
-  updateTodo,
-} from "../services/todo.service";
-import type { TodoChangeInput, TodoInput, TodoTask } from "../todo.types";
+import { deleteTodo, deleteTodoByReference, addTodo } from "../services/todo.service";
+import type { TodoTask, TodoInput } from "../todo.types";
 
-/** Resultado retornado pelo hook de tarefas. */
-interface UseTodoTasksResult {
-  /** Lista de tarefas do usuário. */
-  tasks: TodoTask[];
-  /** Indica se as tarefas estão carregando. */
-  isLoading: boolean;
-  /** Indica se alguma mutação está em andamento. */
-  isSaving: boolean;
-  /** Cria uma tarefa. */
-  addTodo: (input: TodoInput) => Promise<TodoTask>;
-  /** Edita uma tarefa existente. */
-  changeTodo: (params: TodoChangeInput) => Promise<TodoTask>;
-  /** Remove uma tarefa. */
-  removeTodo: (id: string) => Promise<void>;
-  /** Alterna o status de conclusão. */
-  toggleTodoCompletion: (id: string, completed: boolean) => Promise<TodoTask>;
-}
-
-/**
- * Gerencia consultas e mutações das tarefas do usuário.
- *
- * Usa TanStack Query para manter a lista sincronizada após alterações.
- */
-export function useTodoTasks(userId: string | undefined): UseTodoTasksResult {
+export function useSoftDeleteTodo(userId: string | undefined) {
   const queryClient = useQueryClient();
-  const queryKey = todoQueryKeys.userTasks(userId ?? "anonymous");
-
-  const { data = [], isLoading } = useQuery({
-    queryKey,
-    queryFn: () => fetchUserTodos(userId ?? ""),
-    enabled: Boolean(userId),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: async (input: TodoInput) => {
-      if (!userId) throw new Error("Usuário não autenticado.");
-      return addTodo(userId, input);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-      toast.success("Tarefa criada com sucesso.");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Não foi possível criar a tarefa.");
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, input }: TodoChangeInput) => {
-      if (!userId) throw new Error("Usuário não autenticado.");
-      return updateTodo(id, input);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-      toast.success("Tarefa editada com sucesso.");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Não foi possível editar a tarefa.");
-    },
-  });
+  const queryKey = userId ? ["todos", userId] : ["todos", "anonymous"];
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, task }: { id: string; task: TodoTask }) => {
       if (!userId) throw new Error("Usuário não autenticado.");
-      return deleteTodo(id);
+
+      if (id) {
+        return deleteTodo(id);
+      } else if ((task as any).dyad_reference) {
+        return deleteTodoByReference((task as any).dyad_reference);
+      } else {
+        throw new Error("ID da tarefa e referência não informados.");
+      }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Tarefa removida com sucesso.");
+
+      toast.success("Tarefa excluída.", {
+        description: "Você pode desfazer a ação.",
+        action: {
+          label: "Desfazer",
+          onClick: () => {
+            const { title, description, completed, start_date, due_date } = variables.task;
+
+            const input: TodoInput = {
+              title,
+              description: description ?? "",
+              completed,
+              start_datetime: start_date ?? undefined,
+              due_datetime: due_date ?? undefined,
+            };
+
+            addTodo(userId, input)
+              .then(() => {
+                toast.success("Tarefa restaurada.");
+                queryClient.invalidateQueries({ queryKey });
+              })
+              .catch((e) => {
+                toast.error(`Falha ao restaurar: ${e.message}`);
+              });
+          },
+        },
+        duration: 8000,
+      });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Não foi possível remover a tarefa.");
+    onError: (error) => {
+      toast.error(`Erro ao excluir tarefa: ${error.message}`);
     },
   });
 
-  const toggleMutation = useMutation({
-    mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      if (!userId) throw new Error("Usuário não autenticado.");
-      return toggleTodoCompletion(userId, id, completed);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Não foi possível atualizar a tarefa.");
-    },
-  });
+  const softDelete = (task: TodoTask) => {
+    const safeId = task.id !== null && task.id !== undefined ? String(task.id) : "";
 
-  return {
-    tasks: data,
-    isLoading,
-    isSaving:
-      createMutation.isPending ||
-      updateMutation.isPending ||
-      deleteMutation.isPending ||
-      toggleMutation.isPending,
-    addTodo: createMutation.mutateAsync,
-    changeTodo: updateMutation.mutateAsync,
-    removeTodo: deleteMutation.mutateAsync,
-    toggleTodoCompletion: (id: string, completed: boolean) =>
-      toggleMutation.mutateAsync({ id, completed }),
+    if (safeId.trim() === "") {
+      toast.error("Tarefa inválida", {
+        description: "Esta tarefa não possui um ID válido no sistema e não pode ser excluída.",
+      });
+      return Promise.reject(new Error("ID da tarefa inválido"));
+    }
+
+    return deleteMutation.mutateAsync({ id: safeId, task });
   };
+
+  return { softDelete, isDeleting: deleteMutation.isPending };
 }
