@@ -56,10 +56,17 @@ export function useSoftDeleteTodo(userId: string | undefined) {
   });
 
   const softDelete = (task: TodoTask) => {
-    // 1. Normaliza o ID: transforma em string caso seja um número, ou mantém vazio se for nulo
     const safeId = task.id !== null && task.id !== undefined ? String(task.id) : "";
 
-    // 2. Verifica se, após a conversão, o ID possui conteúdo real
     if (safeId.trim() === "") {
       toast.error("Tarefa inválida", {
+        description: "Esta tarefa não possui um ID válido no sistema e não pode ser excluída.",
+      });
+      return Promise.reject(new Error("ID da tarefa inválido"));
+    }
+
+    return deleteMutation.mutateAsync({ id: safeId, task });
+  };
+
+  return { softDelete, isDeleting: deleteMutation.isPending };
 }
