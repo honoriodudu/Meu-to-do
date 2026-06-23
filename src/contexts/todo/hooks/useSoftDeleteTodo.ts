@@ -21,14 +21,14 @@ export function useSoftDeleteTodo(userId: string | undefined) {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey });
-      
+
       toast.success("Tarefa excluída.", {
         description: "Você pode desfazer a ação.",
         action: {
           label: "Desfazer",
           onClick: () => {
             const { title, description, completed, start_date, due_date } = variables.task;
-            
+
             const input: TodoInput = {
               title,
               description: description ?? "",
@@ -56,20 +56,17 @@ export function useSoftDeleteTodo(userId: string | undefined) {
   });
 
   const softDelete = (task: TodoTask) => {
-    // Safely check if task.id is a non-empty string after trimming
-    let taskId: string | null = null;
-    if (task.id != null && typeof task.id === "string") {
-      taskId = task.id.trim();
-    }
-
-    if (!taskId) {
-      toast.error("Tarefa inválida", { 
-        description: "Esta tarefa não possui um ID válido no sistema e não pode ser excluída." 
+    // Verify that the ID exists and is a non‑empty string before proceeding
+    if (!task.id || typeof task.id !== "string" || task.id === "") {
+      toast.error("Tarefa inválida", {
+        description:
+          "Esta tarefa não possui um ID válido no sistema e não pode ser excluída.",
       });
       return Promise.reject(new Error("ID da tarefa inválido"));
     }
-    
-    return deleteMutation.mutateAsync({ id: taskId, task });
+
+    // Use the ID directly (no trim) as it is already validated
+    return deleteMutation.mutateAsync({ id: task.id, task });
   };
 
   return { softDelete, isDeleting: deleteMutation.isPending };
