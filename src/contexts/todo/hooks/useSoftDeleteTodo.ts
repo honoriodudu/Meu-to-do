@@ -8,7 +8,7 @@ export function useSoftDeleteTodo(userId: string | undefined) {
   const queryKey = userId ? ["todos", userId] : ["todos", "anonymous"];
 
   const deleteMutation = useMutation({
-    mutationFn: async ({ id, task }: { id?: string; task: TodoTask }) => {
+    mutationFn: async ({ id, task }: { id: string; task: TodoTask }) => {
       if (!userId) throw new Error("Usuário não autenticado.");
 
       if (id) {
@@ -55,18 +55,22 @@ export function useSoftDeleteTodo(userId: string | undefined) {
     },
   });
 
-  const softDelete = (task: TodoTask) => {
-    // Verify that the ID exists and is a non‑empty string before proceeding
-    if (!task.id || typeof task.id !== "string" || task.id === "") {
+  // Transformamos a função em async para o React lidar de forma suave com ela
+  const softDelete = async (task: TodoTask) => {
+    const safeId = task.id !== null && task.id !== undefined ? String(task.id) : "";
+
+    if (safeId.trim() === "") {
       toast.error("Tarefa inválida", {
-        description:
-          "Esta tarefa não possui um ID válido no sistema e não pode ser excluída.",
+        description: "Esta tarefa não possui um ID válido no sistema e não pode ser excluída.",
       });
-      return Promise.reject(new Error("ID da tarefa inválido"));
+      return; // Sai da função em silêncio, o Vite não vai mais exibir a tela vermelha
     }
 
-    // Use the ID directly (no trim) as it is already validated
-    return deleteMutation.mutateAsync({ id: task.id, task });
+    try {
+      await deleteMutation.mutateAsync({ id: safeId, task });
+    } catch (e) {
+      // Engole o erro para não quebrar a tela. O 'onError' lá em cima já exibe o aviso.
+    }
   };
 
   return { softDelete, isDeleting: deleteMutation.isPending };
