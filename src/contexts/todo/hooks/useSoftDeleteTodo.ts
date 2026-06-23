@@ -56,15 +56,20 @@ export function useSoftDeleteTodo(userId: string | undefined) {
   });
 
   const softDelete = (task: TodoTask) => {
-    // Verifica se o ID é uma string não vazia (evita erro ao chamar .trim() em não-string)
-    if (task.id == null || typeof task.id !== "string" || task.id.trim() === "") {
+    // Safely check if task.id is a non-empty string after trimming
+    let taskId: string | null = null;
+    if (task.id != null && typeof task.id === "string") {
+      taskId = task.id.trim();
+    }
+
+    if (!taskId) {
       toast.error("Tarefa inválida", { 
         description: "Esta tarefa não possui um ID válido no sistema e não pode ser excluída." 
       });
       return Promise.reject(new Error("ID da tarefa inválido"));
     }
     
-    return deleteMutation.mutateAsync({ id: task.id, task });
+    return deleteMutation.mutateAsync({ id: taskId, task });
   };
 
   return { softDelete, isDeleting: deleteMutation.isPending };
