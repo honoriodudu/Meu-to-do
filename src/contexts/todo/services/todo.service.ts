@@ -31,7 +31,7 @@ export async function fetchUserTodos(userId: string): Promise<TodoTask[]> {
     .from("todos")
     .select("*")
     .eq("user_id", userId)
-    .eq("deleted_at", null)
+    .is("deleted_at", null) // <-- CORREÇÃO APLICADA AQUI
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
