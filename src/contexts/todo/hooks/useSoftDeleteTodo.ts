@@ -56,11 +56,11 @@ export function useSoftDeleteTodo(userId: string | undefined) {
       toast.error("Tarefa inválida", {
         description: "Esta tarefa não possui um ID válido no sistema e não pode ser excluída. Verifique se a tarefa foi criada corretamente.",
       });
-      return;
+      return Promise.reject(new Error("ID da tarefa inválido"));
     }
 
-    // 3. Usa .mutate() (seguro) em vez de .mutateAsync() (que causa clientIframe error)
-    deleteMutation.mutate({ id: task.id, task });
+    // 3. Usa mutateAsync para retornar uma promise que pode ser aguardada
+    return deleteMutation.mutateAsync({ id: task.id, task });
   };
 
   return { softDelete, isDeleting: deleteMutation.isPending };
