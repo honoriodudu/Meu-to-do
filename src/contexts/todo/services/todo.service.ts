@@ -30,6 +30,7 @@ export async function fetchUserTodos(userId: string): Promise<TodoTask[]> {
     .from("todos")
     .select("*")
     .eq("user_id", userId)
+    .is("deleted_at", null) // Only show non-deleted tasks
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -83,46 +84,29 @@ export async function updateTodo(id: string, input: TodoInput): Promise<TodoTask
   return data;
 }
 
-/** Remove uma tarefa do banco. */
+/** Move uma tarefa para a lixeira (soft delete). */
 export async function deleteTodo(id: string): Promise<void> {
-  const { error } = await supabase.from("todos").delete().eq("id", id);
-
+  const { error } = await supabase.rpc("soft_delete_todo", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
-/** Alterna o status de conclusão de uma tarefa pertencente ao usuário atual. */
-export async function toggleTodoCompletion(
-  userId: string,
-  id: string,
-  completed: boolean,
-): Promise<TodoTask> {
-  // Primeiro verifica se a tarefa existe e pertence ao usuário
-  const { data: existingTask, error: fetchError } = await supabase
+/** Restaura uma tarefa da lixeira. */
+export async function restoreTodo(id: string): Promise<TodoTask> {
+  const { error } = await supabase.rpc("restore_todo", { p_id: id });
+  if (error) throw new Error(error.message);
+  
+  // Buscar a tarefa restaurada
+  const { data, error: fetchError } = await supabase
     .from("todos")
     .select("*")
     .eq("id", id)
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (fetchError) {
-    throw new Error(fetchError.message);
-  }
-
-  if (!existingTask) {
-    throw new Error("Tarefa não encontrada.");
-  }
-
-  // Agora atualiza o status
-  const { data, error } = await supabase
-    .from("todos")
-    .update({ completed })
-    .eq("id", id)
-    .eq("user_id", userId)
-    .select()
     .single();
-
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Não foi possível atualizar a tarefa.");
-
+  if (fetchError) throw new Error(fetchError.message);
   return data;
+}
+
+/** Exclui permanentemente uma tarefa. */
+export async function forceDeleteTodo(id: string): Promise<void> {
+  const { error } = await supabase.from("todos").delete().eq("id", id);
+  if (error) throw new Error(error.message);
 }
