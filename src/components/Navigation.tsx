@@ -4,10 +4,12 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth(); // authentication state
 
   const navItems = [
     { path: "/", label: "Início" },
@@ -16,7 +18,8 @@ const Navigation = () => {
     { path: "/pricing", label: "Preços" },
     { path: "/contact", label: "Contato" },
     { path: "/home", label: "Minhas Tarefas" },
-    { path: "/trash", label: "Lixeira" }, // <-- new item
+    // Show Lixeira only when a user is logged in
+    ...(user ? [{ path: "/trash", label: "Lixeira" }] : []),
   ];
 
   return (
@@ -49,11 +52,7 @@ const Navigation = () => {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(!isOpen)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
