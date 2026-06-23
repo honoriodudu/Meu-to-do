@@ -10,7 +10,6 @@ import { ListTodo, Plus } from "lucide-react";
 import { TodoFormDialog } from "@/contexts/todo/components/TodoFormDialog";
 import { TodoList } from "@/contexts/todo/components/TodoList";
 import { useTodoTasks } from "@/contexts/todo/hooks/useTodoTasks";
-import { TrashButton } from "@/components/TrashButton";
 import type { TodoTask } from "@/contexts/todo/todo.types";
 
 /**
@@ -21,7 +20,7 @@ import type { TodoTask } from "@/contexts/todo/todo.types";
 const Home = () => {
   const { user, loading: authLoading } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<TodoTask | undefined>();;
+  const [editingTask, setEditingTask] = useState<TodoTask | undefined>();
 
   const {
     tasks,
@@ -94,8 +93,6 @@ const Home = () => {
             <Plus className="h-4 w-4" />
             Nova tarefa
           </Button>
-          {/* Trash button */}
-          <TrashButton />
         </div>
       </header>
 
