@@ -17,6 +17,7 @@ import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import SQLEditor from "./pages/SQLEditor";
+import Trash from "./pages/Trash"; // <-- new import
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,15 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* New protected Trash route */}
+                <Route
+                  path="/trash"
+                  element={
+                    <ProtectedRoute>
+                      <Trash />
                     </ProtectedRoute>
                   }
                 />

@@ -15,6 +15,8 @@ const Navigation = () => {
     { path: "/services", label: "Serviços" },
     { path: "/pricing", label: "Preços" },
     { path: "/contact", label: "Contato" },
+    { path: "/home", label: "Minhas Tarefas" },
+    { path: "/trash", label: "Lixeira" }, // <-- new item
   ];
 
   return (
@@ -24,7 +26,7 @@ const Navigation = () => {
           <div className="flex items-center">
             <h1 className="text-xl font-bold text-foreground">Meu App</h1>
           </div>
-          
+
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (

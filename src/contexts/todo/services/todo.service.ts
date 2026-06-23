@@ -5,6 +5,7 @@ import { toDatabaseDueDate, toDatabaseStartDate } from "../todo.utils";
 export const todoQueryKeys = {
   all: ["todos"] as const,
   userTasks: (userId: string) => [...todoQueryKeys.all, userId] as const,
+  deleted: (userId: string) => [...todoQueryKeys.all, "deleted", userId] as const,
 };
 
 type TodoInsertPayload = {
@@ -24,20 +25,33 @@ type TodoUpdatePayload = {
   due_date: string | null;
 };
 
-/** Busca todas as tarefas do usuário autenticado. */
+/** Fetch active tasks */
 export async function fetchUserTodos(userId: string): Promise<TodoTask[]> {
   const { data, error } = await supabase
     .from("todos")
     .select("*")
     .eq("user_id", userId)
+    .eq("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
-
   return data ?? [];
 }
 
-/** Cria uma nova tarefa com data de início e prazo final. */
+/** Fetch tasks that are in the trash (soft‑deleted) */
+export async function fetchDeletedTodos(userId: string): Promise<TodoTask[]> {
+  const { data, error } = await supabase
+    .from("todos")
+    .select("*")
+    .eq("user_id", userId)
+    .not("deleted_at", "is", null) // only rows with a deleted_at timestamp
+    .order("deleted_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+/** Create a new task */
 export async function addTodo(userId: string, input: TodoInput): Promise<TodoTask> {
   const payload: TodoInsertPayload = {
     title: input.title,
@@ -60,7 +74,7 @@ export async function addTodo(userId: string, input: TodoInput): Promise<TodoTas
   return data;
 }
 
-/** Atualiza uma tarefa existente preservando data de início e prazo final. */
+/** Update an existing task */
 export async function updateTodo(id: string, input: TodoInput): Promise<TodoTask> {
   const payload: TodoUpdatePayload = {
     title: input.title,
@@ -83,20 +97,31 @@ export async function updateTodo(id: string, input: TodoInput): Promise<TodoTask
   return data;
 }
 
-/** Remove uma tarefa do banco. */
+/** Soft‑delete a task (moves it to the trash) */
 export async function deleteTodo(id: string): Promise<void> {
-  const { error } = await supabase.from("todos").delete().eq("id", id);
-
+  const { error } = await supabase.rpc("soft_delete_todo", { p_id: id });
   if (error) throw new Error(error.message);
 }
 
-/** Alterna o status de conclusão de uma tarefa pertencente ao usuário atual. */
+/** Restore a task from the trash */
+export async function restoreTodo(id: string): Promise<void> {
+  const { error } = await supabase.rpc("restore_todo", { p_id: id });
+  if (error) throw new Error(error.message);
+}
+
+/** Permanently delete a task (hard delete) */
+export async function hardDeleteTodo(id: string): Promise<void> {
+  const { error } = await supabase.from("todos").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+/** Toggle completion status */
 export async function toggleTodoCompletion(
   userId: string,
   id: string,
   completed: boolean,
 ): Promise<TodoTask> {
-  // Primeiro verifica se a tarefa existe e pertence ao usuário
+  // Verify ownership first
   const { data: existingTask, error: fetchError } = await supabase
     .from("todos")
     .select("*")
@@ -104,15 +129,9 @@ export async function toggleTodoCompletion(
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (fetchError) {
-    throw new Error(fetchError.message);
-  }
+  if (fetchError) throw new Error(fetchError.message);
+  if (!existingTask) throw new Error("Tarefa não encontrada.");
 
-  if (!existingTask) {
-    throw new Error("Tarefa não encontrada.");
-  }
-
-  // Agora atualiza o status
   const { data, error } = await supabase
     .from("todos")
     .update({ completed })
