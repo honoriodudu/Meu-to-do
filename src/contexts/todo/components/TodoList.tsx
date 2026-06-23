@@ -14,8 +14,8 @@ interface TodoListProps {
   onToggle: (id: string, completed: boolean) => Promise<void>;
   /** Callback chamado ao abrir edição. */
   onEdit: (task: TodoTask) => void;
-  /** Callback chamado ao remover tarefa. */
-  onDelete: (id: string) => Promise<void>;
+  /** Callback chamado ao remover tarefa. Recebe o objeto completo da tarefa. */
+  onDelete: (task: TodoTask) => Promise<void>;
 }
 
 /**
