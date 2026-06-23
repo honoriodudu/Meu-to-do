@@ -21,8 +21,9 @@ const Home = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TodoTask | undefined>();
 
+  // Provide a default empty array for tasks to avoid undefined errors
   const {
-    tasks,
+    data: tasks = [],
     isLoading,
     addTodo,
     changeTodo,
@@ -138,7 +139,7 @@ const Home = () => {
                 isLoading={isLoading}
                 onToggle={toggleTodoCompletion}
                 onEdit={openEditDialog}
-                onDelete={softDelete} // <-- soft‑delete aqui
+                onDelete={softDelete}
               />
             </CardContent>
           </Card>
