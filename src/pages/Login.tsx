@@ -1,40 +1,41 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { toast } from 'sonner'
-import { supabase } from '@/integrations/supabase/client'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      })
+      });
 
       if (error) {
-        toast.error('Falha ao fazer login: ' + error.message)
-        return
+        toast.error("Falha ao fazer login: " + error.message);
+        return;
       }
 
-      navigate('/', { replace: true })
+      // After successful login, redirect to the home page
+      navigate("/", { replace: true });
     } catch (error) {
-      toast.error('Erro ao fazer login: ' + (error.message || 'Tente novamente'))
+      toast.error("Erro ao fazer login: " + (error.message || "Tente novamente"));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -70,12 +71,12 @@ const Login = () => {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-foreground">
-              Não tem uma conta?{' '}
+              Não tem uma conta?{" "}
               <a href="/signup" className="text-primary hover:underline">
                 Cadastre-se
               </a>
@@ -84,7 +85,7 @@ const Login = () => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
