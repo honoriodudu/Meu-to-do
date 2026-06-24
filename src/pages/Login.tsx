@@ -28,7 +28,7 @@ const Login = () => {
         return
       }
 
-      navigate('/home', { replace: true })
+      navigate('/', { replace: true })
     } catch (error) {
       toast.error('Erro ao fazer login: ' + (error.message || 'Tente novamente'))
     } finally {

@@ -25,6 +25,7 @@ const Index = () => {
             Organize suas tarefas diárias com data de início, prazo final e status.
           </p>
           <div className="flex gap-4 justify-center">
+            {/* Hide the "Começar Agora" button when the user is logged in */}
             {!user && (
               <Button size="lg" className="px-8" asChild>
                 <a href="/login">
