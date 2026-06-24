@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Trash2 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -19,7 +19,7 @@ const Navigation = () => {
     { path: "/contact", label: "Contato" },
     { path: "/home", label: "Minhas Tarefas" },
     // Show Lixeira only when a user is logged in
-    ...(user ? [{ path: "/trash", label: "Lixeira" }] : []),
+    ...(user ? [{ path: "/trash", label: "Lixeira", icon: Trash2 }] : []),
   ];
 
   return (
@@ -37,12 +37,13 @@ const Navigation = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
+                  "flex items-center text-sm font-medium transition-colors hover:text-primary",
                   location.pathname === item.path
                     ? "text-primary"
                     : "text-muted-foreground"
                 )}
               >
+                {item.icon && <item.icon className="h-4 w-4 mr-1" />}
                 {item.label}
               </Link>
             ))}
@@ -67,13 +68,14 @@ const Navigation = () => {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground",
+                    "flex items-center text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground",
                     location.pathname === item.path
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground"
                   )}
                   onClick={() => setIsOpen(false)}
                 >
+                  {item.icon && <item.icon className="h-4 w-4 mr-1" />}
                   {item.label}
                 </Link>
               ))}
