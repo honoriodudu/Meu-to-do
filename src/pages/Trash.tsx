@@ -56,7 +56,7 @@ const Trash = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Não há tarefas na lixeira. Quando excluir uma tarefa, ela aparecerá aqui.
+                Não há tarefas na lixeira. Quando excluir uma tarefa uma tarefa, ela aparecerá aqui.
               </p>
             </CardContent>
           </Card>

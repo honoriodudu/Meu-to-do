@@ -2,11 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navigation from "./components/Navigation";
-import ThemeToggle from "./components/ThemeToggle";
+import { ThemeToggle } from "./components/ThemeToggle";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Services from "./pages/Services";
@@ -17,7 +17,7 @@ import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import SQLEditor from "./pages/SQLEditor";
-import Trash from "./pages/Trash"; // <-- new import
+import Trash from "./pages/Trash";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +39,6 @@ const App = () => (
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
-                {/* Protect SQLEditor */}
                 <Route
                   path="/sql-editor"
                   element={
@@ -56,7 +55,6 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                {/* New protected Trash route */}
                 <Route
                   path="/trash"
                   element={

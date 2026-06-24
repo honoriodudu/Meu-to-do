@@ -1,4 +1,4 @@
-import { User } from './supabaseClient'
+import type { User } from '@supabase/supabase-js'
 
 // Simulação de autenticação com localStorage
 export const mockAuth = {
@@ -14,8 +14,11 @@ export const mockAuth = {
       const user: User = {
         id: '1',
         email,
-        created_at: new Date().toISOString()
-      }
+        created_at: new Date().toISOString(),
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+      } as User
       this.currentUser = user
       localStorage.setItem('user', JSON.stringify(user))
       return user
@@ -32,8 +35,11 @@ export const mockAuth = {
     const user: User = {
       id: Math.random().toString(36).substr(2, 9),
       email,
-      created_at: new Date().toISOString()
-    }
+      created_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+    } as User
     this.currentUser = user
     localStorage.setItem('user', JSON.stringify(user))
     return user

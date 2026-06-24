@@ -43,6 +43,10 @@ const Home = () => {
     setDialogOpen(true);
   };
 
+  const handleToggle = async (id: string, completed: boolean) => {
+    await toggleTodoCompletion(id, completed);
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -132,7 +136,7 @@ const Home = () => {
               <TodoList
                 tasks={tasks}
                 isLoading={isLoading}
-                onToggle={toggleTodoCompletion}
+                onToggle={handleToggle}
                 onEdit={openEditDialog}
                 onDelete={removeTodo}
               />

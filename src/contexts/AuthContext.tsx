@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../integrations/supabase/client'
-import type { User } from '../lib/supabaseClient'
+import type { User } from '@supabase/supabase-js'
 
 interface AuthContextType {
   user: User | null
@@ -29,17 +29,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const getUser = async () => {
       try {
-        // Verificar se há usuário logado
         const { data: { user: currentUser } } = await supabase.auth.getUser()
         
         if (currentUser) {
-          setUser({
-            id: currentUser.id,
-            email: currentUser.email!,
-            created_at: currentUser.created_at
-          })
+          setUser(currentUser)
           
-          // Carregar perfil do usuário
           const { data: profileData } = await supabase
             .from('profiles')
             .select('*')
@@ -57,16 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     getUser()
 
-    // Configurar listener de mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          created_at: session.user.created_at
-        })
+        setUser(session.user)
         
-        // Carregar perfil
         const { data: profileData } = await supabase
           .from('profiles')
           .select('*')
