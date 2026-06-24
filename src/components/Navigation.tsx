@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Trash2 } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -46,32 +46,13 @@ const Navigation = () => {
                 {item.label}
               </Link>
             ))}
-            {/* Trash icon button for logged‑in users */}
-            {user && (
-              <Link
-                to="/trash"
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
-                  location.pathname === "/trash"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-                aria-label="Lixeira"
-              >
-                <Trash2 className="h-5 w-5" />
-              </Link>
-            )}
             <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(!isOpen)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
@@ -96,25 +77,6 @@ const Navigation = () => {
                   {item.label}
                 </Link>
               ))}
-              {/* Mobile trash icon */}
-              {user && (
-                <Link
-                  to="/trash"
-                  className={cn(
-                    "text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground",
-                    location.pathname === "/trash"
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground"
-                  )}
-                  onClick={() => setIsOpen(false)}
-                  aria-label="Lixeira"
-                >
-                  <div className="flex items-center gap-2">
-                    <Trash2 className="h-4 w-4" />
-                    Lixeira
-                  </div>
-                </Link>
-              )}
             </div>
           </div>
         )}
