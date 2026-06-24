@@ -1,5 +1,6 @@
 import { mockAuth } from '../lib/auth-utils'
-import type { User } from '@supabase/supabase-js' // <-- corrected import
+import type { User } from '@supabase/supabase-js'
+import React, { createContext, useContext, useState, useEffect } from 'react'
 
 interface AuthContextType {
   user: User | null
