@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ListTodo, Database } from "lucide-react";
@@ -12,6 +13,8 @@ import GlassCard from "@/components/ui/GlassCard";
  * Showcases the new glassmorphism visual style via GlassCard.
  */
 const Index = () => {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
@@ -33,12 +36,14 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
-            <Button variant="outline" size="lg" className="px-8" asChild>
-              <a href="/about">
-                Sobre
-                <Database className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
+            {!user && (
+              <Button variant="outline" size="lg" className="px-8" asChild>
+                <a href="/about">
+                  Sobre
+                  <Database className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            )}
           </div>
         </div>
       </section>
@@ -118,12 +123,14 @@ const Index = () => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
-                <Button variant="outline" size="lg" asChild>
-                  <a href="/about">
-                    Sobre Nós
-                    <Database className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
+                {!user && (
+                  <Button variant="outline" size="lg" asChild>
+                    <a href="/about">
+                      Sobre Nós
+                      <Database className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
