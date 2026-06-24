@@ -1,15 +1,17 @@
 "use client";
 
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ArrowRight, ListTodo, Database } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import GlassCard from "@/components/ui/GlassCard";
 
+/**
+ * Public landing page.
+ *
+ * Showcases the new glassmorphism visual style via GlassCard.
+ */
 const Index = () => {
-  const { user } = useAuth();
-
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
@@ -25,18 +27,15 @@ const Index = () => {
             Organize suas tarefas diárias com data de início, prazo final e status.
           </p>
           <div className="flex gap-4 justify-center">
-            {/* Hide the "Começar Agora" button when the user is logged in */}
-            {!user && (
-              <Button size="lg" className="px-8" asChild>
-                <a href="/login">
-                  Começar Agora
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-            )}
-            <Button variant="outline" size="lg" asChild>
+            <Button size="lg" className="px-8" asChild>
+              <a href="/login">
+                Começar Agora
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+            <Button variant="outline" size="lg" className="px-8" asChild>
               <a href="/about">
-                Sobre Nós
+                Sobre
                 <Database className="ml-2 h-4 w-4" />
               </a>
             </Button>
@@ -63,7 +62,9 @@ const Index = () => {
             ].map((item, i) => (
               <Card key={i} className="text-center">
                 <CardHeader>
-                  <div className={`h-12 w-12 bg-${item.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
+                  <div
+                    className={`h-12 w-12 bg-${item.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}
+                  >
                     <ListTodo className={`h-6 w-6 text-${item.color}-600`} />
                   </div>
                   <CardTitle className="text-lg">{item.label}</CardTitle>
@@ -75,7 +76,7 @@ const Index = () => {
             ))}
           </div>
 
-          {/* Visual showcase */}
+          {/* New visual showcase */}
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="text-2xl">Novo Estilo Visual</CardTitle>
